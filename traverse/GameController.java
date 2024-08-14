@@ -6,6 +6,7 @@
 // Purpose:	Manage the game operations
 //
 // Limitations:	Cannot run the game or ending sequences
+// 				Is a Singleton
 //
 // Development Computer: HP Pavilion HPE Series [h8-1124]
 // Operating System: PopOS
@@ -38,26 +39,34 @@ public class GameController {
 									 ""};
 	final String[] END_MESSAGE = 	{"",
 									 ""};
-	Board board;
-	int sequenceNumber;
-	short players;
-	boolean humanPlayer;
-	int maximumRounds;
-	int currentTurns;
-	short boardDisplayMode;
+	static Board board;
+	static int sequenceNumber;
+	static short players;
+	static boolean humanPlayer;
+	static int maximumRounds;
+	static int currentTurns;
+	static short boardDisplayMode;
 	
 	static Scanner kb = new Scanner(System.in);
 	
+	static GameController gameControllerSingleton = new GameController();
+	
+	// Generates a GameController
+	private GameController(){
+		
+	}
+	
 	// Assigns the driver's board to the game controller's 
-	// variable.
-	public GameController(Board board){
-		this.board = board;
+	// variable and returns the controller.
+	public static GameController getGameController(Board board) {
+		GameController.board = board;
 		sequenceNumber = 1;
 		players = 4;
 		humanPlayer = true;
 		maximumRounds = 10;
 		currentTurns = 0;
 		boardDisplayMode = 1;
+		return gameControllerSingleton;
 	}
 	
 	// Outputs a prompt to the terminal and gets a sanitized 

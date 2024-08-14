@@ -18,7 +18,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Board {
-	Piece[][] board = new Piece[10][10];
+	final int boardWidth = 10;
+	final int boardHeight = 10;
+	
+	Piece[][] board = new Piece[boardWidth][boardHeight];
 	Piece[][] playerPieces = new Piece[8][4];
 	
 	// Creates 8 pieces for each participating player and assigns 

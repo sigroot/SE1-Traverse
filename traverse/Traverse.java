@@ -22,7 +22,7 @@ public class Traverse {
 	// Runs gameController
 	public static void main(String[] args) {
 		board = new Board();
-		gameController = new GameController(board);
+		gameController = GameController.getGameController(board);
 		
 		gameController.run();
 	}
