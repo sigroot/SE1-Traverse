@@ -5,15 +5,15 @@
 // File name: GameController.java
 // Purpose:	Manage the game operations
 //
-// Limitations:	Cannot run the game or ending sequences
-// 				Is a Singleton
+// Limitations:	Is a Singleton
+//				Cannot run the end sequence
 //
-// Development Computer: HP Pavilion HPE Series [h8-1124]
-// Operating System: PopOS
+// Development Computer: Framework 16
+// Operating System: Ubuntu 24.04
 // Integrated Development Environment (IDE): Eclipse 4.32.0
 // Compiler: Java JDK 17
 // Build Directions: See the Traverse class
-// Operational Status: Runs the introduction
+// Operational Status: Runs the introduction and a round of the game
 ///////////////////////////////////////////////////////////////////
 import java.util.Scanner;
 
@@ -35,12 +35,14 @@ public class GameController {
     								 "Settings saved...",
     								 "Enter two coordinates separated by a dash (eg. :> b1-e1) \nto swap your pieces, or type \"start\" to start.",
     								 "<<<Corner Spaces are invalid, please try again.>>>"};
-	final String[] GAME_MESSAGE = 	{"",
-									 ""};
+	final String[] GAME_MESSAGE = 	{"Player #",
+									 "'s move:",
+									 "Enter a string of coordinates separated by dashes to make\na legal move. (eg. :> c3-c5-e5)",
+									 "Illegal move, you may land a piece on an empty, non-corner\nspace that it can reach with movement or jumping.",
+									 "Type \"c\" to continue."};
 	final String[] END_MESSAGE = 	{"",
 									 ""};
 	static Board board;
-	static int sequenceNumber;
 	static short players;
 	static boolean humanPlayer;
 	static int maximumRounds;
@@ -60,7 +62,6 @@ public class GameController {
 	// variable and returns the controller.
 	public static GameController getGameController(Board board) {
 		GameController.board = board;
-		sequenceNumber = 1;
 		players = 4;
 		humanPlayer = true;
 		maximumRounds = 10;
@@ -189,36 +190,53 @@ public class GameController {
 		
 		// Set up the board
 		board.createBoard(players);
-		
+		printedBoard = board.printBoard();
+		for(int i = 0; i < printedBoard.length; i++) {
+			System.out.println(printedBoard[i]);
+		}
 		while(!menuInput.equals("start")){
-			printedBoard = board.printBoard();
-			for(int i = 0; i < printedBoard.length; i++) {
-				System.out.println(printedBoard[i]);
-			}
 			System.out.println(INTRO_MESSAGE[14]);
 			menuInput = getKeyboard(":> ");
 			if(menuInput.equals("start")) {
 				break;
 			}
-			swapCoordinates = menuInput.split("-");
 			// Clean input
-			// TODO ADD 10 FUNCTIONALITY
+			swapCoordinates = board.cleanMoveString(menuInput).split("-");
+			
+			// Reprint the board
+			printedBoard = board.printBoard();
+			for(int i = 0; i < printedBoard.length; i++) {
+				System.out.println(printedBoard[i]);
+			}
+			
+			// Ensures there are only two spaces selected
 			if(swapCoordinates.length != 2) {
 				System.out.println(INTRO_MESSAGE[12]);
 				continue;
-			}if(swapCoordinates[0].length() > 2 || swapCoordinates[1].length() > 2) {
+			}
+			// Ensures the space string length is correct
+			if(swapCoordinates[0].length() > 2 || swapCoordinates[1].length() > 2) {
 				System.out.println(INTRO_MESSAGE[12]);
 				continue;
-			}if(swapCoordinates[0].charAt(1) != '1' || swapCoordinates[1].charAt(1) != '1') {
+			}
+			
+			// checks for the piece being on the home row
+			if(swapCoordinates[0].charAt(1) != '1' || swapCoordinates[1].charAt(1) != '1') {
 				System.out.println(INTRO_MESSAGE[12]);
 				continue;
-			}if(swapCoordinates[0].charAt(0) == 'a' || swapCoordinates[1].charAt(0) == 'a') {
+			}
+			
+			// Checks for illegal corner placements
+			if(swapCoordinates[0].charAt(0) == 'a' || swapCoordinates[1].charAt(0) == 'a') {
 				System.out.println(INTRO_MESSAGE[15]);
 				continue;
 			}if(swapCoordinates[0].charAt(0) == 'j' || swapCoordinates[1].charAt(0) == 'j') {
 				System.out.println(INTRO_MESSAGE[15]);
 				continue;
-			}if(!board.movePiece(swapCoordinates[0], swapCoordinates[1])) {
+			}
+			
+			// Attempts to move the piece
+			if(!board.movePiece(swapCoordinates[0], swapCoordinates[1])) {
 				System.out.println(INTRO_MESSAGE[12]);
 				continue;
 			}
@@ -231,9 +249,125 @@ public class GameController {
 	// and asking the user to continue or enter a move, 
 	// until a game end state has been reached.
 	void gameSequence() {
-		// Is a Stub
+		boolean gameContinue = true;
+		String gameInput = "";
+		String[] printedBoard;
+		short movingPlayer;
+		// Ensure game is in playable state
+		gameContinue = gameContinue && ((currentTurns/players < maximumRounds) || !(maximumRounds > 0));
+		gameContinue = gameContinue && !board.checkGameEnd();
+		while(gameContinue) {
+			// Reset player input
+			gameInput = "";
+			
+			switch(currentTurns%players) {
+				case 0:
+					movingPlayer = 0;
+					break;
+				case 1:
+					if(players>3) {
+						movingPlayer = 2;
+					}else {
+						movingPlayer = 1;
+					}
+					break;
+				case 2:
+					movingPlayer = 1;
+					break;
+				case 3:
+					movingPlayer = 3;
+					break;
+				default:
+					movingPlayer = 0;
+					break;
+			}
+			
+			if((movingPlayer) == 0 && humanPlayer == true) {
+				// Print the board
+				printedBoard = board.printBoard();
+				for(int i = 0; i < printedBoard.length; i++) {
+					System.out.println(printedBoard[i]);
+				}
+				// Print current player's turn
+				System.out.print(GAME_MESSAGE[0]);
+				System.out.print(currentTurns%players);
+				System.out.println(GAME_MESSAGE[1]);
+				
+				// TODO Player moves their piece
+				while(!board.checkLegal(gameInput)) {
+					System.out.println(GAME_MESSAGE[2]);
+					gameInput = getKeyboard(":> ");
+					gameInput = board.cleanMoveString(gameInput);
+					//TODO remove testing output
+					System.out.println("\n"+gameInput+"\n");
+					if(board.checkLegal(gameInput)) {
+						board.movePiece(gameInput);
+						
+						printedBoard = board.printBoard();
+						for(int i = 0; i < printedBoard.length; i++) {
+							System.out.println(printedBoard[i]);
+						}
+						
+						System.out.println(GAME_MESSAGE[4]);
+						gameInput = getKeyboard(":> ");
+						break;
+					}
+					// Reset gameInput
+					gameInput = "";
+					
+					// On error, reprint board and inform human player
+					printedBoard = board.printBoard();
+					for(int i = 0; i < printedBoard.length; i++) {
+						System.out.println(printedBoard[i]);
+					}
+					// Print current player's turn
+					System.out.print(GAME_MESSAGE[0]);
+					System.out.print(currentTurns%players);
+					System.out.println(GAME_MESSAGE[1]);
+					System.out.println(GAME_MESSAGE[3]);
+				}
+				
+			}else {
+				board.movePlayer((short) (movingPlayer));
+				// Print the board
+				printedBoard = board.printBoard();
+				for(int i = 0; i < printedBoard.length; i++) {
+					System.out.println(printedBoard[i]);
+				}
+				// Print current player's turn
+				System.out.print(GAME_MESSAGE[0]);
+				System.out.print(currentTurns%players);
+				System.out.println(GAME_MESSAGE[1]);
+				
+				System.out.println(GAME_MESSAGE[4]);
+				gameInput = getKeyboard(":> ");
+			}
+			currentTurns++;
+			
+			// Check whether game has ended
+			gameContinue = gameContinue && (!(currentTurns/4 >= maximumRounds) || !(maximumRounds > 0));
+			if(!gameContinue) {
+				printedBoard = board.printBoard();
+				for(int i = 0; i < printedBoard.length; i++) {
+					System.out.println(printedBoard[i]);
+				}
+			}
+			gameContinue = gameContinue && !board.checkGameEnd();
+			if(!gameContinue) {
+				printedBoard = board.printBoard();
+				for(int i = 0; i < printedBoard.length; i++) {
+					System.out.println(printedBoard[i]);
+				}
+			}
+			
+			// TODO remove forced end from testing
+			if (currentTurns/players >= 1) {
+				gameContinue = false;
+			}
+		}
 	}
 	
+	// Runs the end of the game and informs the player of the conclusion
 	void endSequence() {
 		// Is a Stub
 	}

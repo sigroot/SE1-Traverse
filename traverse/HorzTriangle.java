@@ -7,8 +7,8 @@
 //
 // Limitations:	
 //
-// Development Computer: HP Pavilion HPE Series [h8-1124]
-// Operating System: PopOS
+// Development Computer: Framework 16
+// Operating System: Ubuntu 24.04
 // Integrated Development Environment (IDE): Eclipse 4.32.0
 // Compiler: Java JDK 17
 // Build Directions: See the Traverse class

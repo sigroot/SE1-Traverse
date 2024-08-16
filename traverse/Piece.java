@@ -7,8 +7,8 @@
 //
 // Limitations:	
 //
-// Development Computer: HP Pavilion HPE Series [h8-1124]
-// Operating System: PopOS
+// Development Computer: Framework 16
+// Operating System: Ubuntu 24.04
 // Integrated Development Environment (IDE): Eclipse 4.32.0
 // Compiler: Java JDK 17
 // Build Directions: See the Traverse class
@@ -20,7 +20,6 @@ public abstract class Piece {
 	boolean[][] moveShape;
 	int[] coordinate;
 	short color;
-	boolean[][] pieceMoveShape;
 	
 	// Creates a piece with a color, an x and y coordinate, and a 
 	// movement shape based on its subclass and starting side of the 
@@ -40,10 +39,10 @@ public abstract class Piece {
 				asciiImage[2] = asciiImage[2].substring(0, 2) + "G" + asciiImage[2].substring(3);
 				break;
 			case 1:
-				asciiImage[2] = asciiImage[2].substring(0, 2) + "Y" + asciiImage[2].substring(3);
+				asciiImage[2] = asciiImage[2].substring(0, 2) + "R" + asciiImage[2].substring(3);
 				break;
 			case 2:
-				asciiImage[2] = asciiImage[2].substring(0, 2) + "R" + asciiImage[2].substring(3);
+				asciiImage[2] = asciiImage[2].substring(0, 2) + "Y" + asciiImage[2].substring(3);
 				break;
 			case 3:
 				asciiImage[2] = asciiImage[2].substring(0, 2) + "B" + asciiImage[2].substring(3);
