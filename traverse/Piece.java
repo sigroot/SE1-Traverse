@@ -26,6 +26,7 @@ public abstract class Piece {
 	// board. It also changes the ASCII representation for the piece 
 	// based on the board side and the color.
 	Piece(short color){
+		this.color = color;
 	}
 	
 	// Returns the ASCII representation.

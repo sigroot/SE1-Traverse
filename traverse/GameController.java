@@ -333,13 +333,13 @@ public class GameController {
 				System.out.println(GAME_MESSAGE[1]);
 				
 				// TODO Player moves their piece
-				while(!board.checkLegal(gameInput)) {
+				while(!board.checkLegal(gameInput, (short) 0)) {
 					System.out.println(GAME_MESSAGE[2]);
 					gameInput = getKeyboard(":> ");
 					gameInput = board.cleanMoveString(gameInput);
 					//TODO remove testing output
 					System.out.println("\n"+gameInput+"\n");
-					if(board.checkLegal(gameInput)) {
+					if(board.checkLegal(gameInput, movingPlayer)) {
 						board.movePiece(gameInput);
 						
 						printedBoard = board.printBoard();
@@ -386,11 +386,6 @@ public class GameController {
 			currentTurns++;
 			
 			// Check whether game has ended
-			// TODO remove forced end from testing
-			if (currentTurns/players >= 1) {
-				gameContinue = false;
-			}
-
 			gameContinue = gameContinue && (!(currentTurns/4 >= maximumRounds) || !(maximumRounds > 0));
 			if(!gameContinue) {
 				printedBoard = board.printBoard();

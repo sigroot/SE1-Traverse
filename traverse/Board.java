@@ -107,20 +107,21 @@ public class Board {
 	
 	// Determines if a piece's movement is legal by the rules of 
 	// Traverse.
-	boolean checkLegal(String movement) {
+	boolean checkLegal(String movement, short player) {
 		String[] moveSquares = movement.split("-");
-		int[] xCoords = new int[movement.length()/3+1];
-		int[] yCoords = new int[movement.length()/3+1];
+		int[] xCoords = new int[moveSquares.length];
+		int[] yCoords = new int[moveSquares.length];
 		int xCoordinate = 0;
 		int yCoordinate = 0;
 		int relativeXMove = 0;
 		int relativeYMove = 0;
 		
-		// Ensure the input uses correct grid spaces;
-		if(moveSquares.length < 2) {
+		// Ensure the input uses between two and four spaces;
+		if(moveSquares.length < 2 || moveSquares.length > 3) {
 			return false;
 		}
 		
+		// Ensure correct range of inputs
 		for(int i = 0; i < moveSquares.length; i++) {
 			if(moveSquares[i].charAt(0) < 'a' || moveSquares[i].charAt(0) > 'j') {
 				return false;
@@ -138,6 +139,7 @@ public class Board {
 		
 		// Ensure legality
 		// No move lands on top of a piece
+		// Divide each move into x and y locations
 		for (int i = 0; i < moveSquares.length; i++) {
 			xCoordinate = ((int) moveSquares[i].charAt(0))-'a';
 			if(moveSquares[i].length() > 2) {
@@ -151,6 +153,12 @@ public class Board {
 			}
 			xCoords[i] = xCoordinate;
 			yCoords[i] = yCoordinate;
+		}
+		
+		// Ensure piece is player's piece
+		if(board[xCoords[0]][yCoords[0]].color != player) {
+			System.out.println("player type fail");
+			return false;
 		}
 		
 		// Last move is not onto a corner
@@ -176,30 +184,38 @@ public class Board {
 			}
 		}
 		
-		// TODO Add jumps
-		// Ensures piece movement is in piece movement pattern
-		relativeXMove = xCoords[1] - xCoords[0];
-		relativeYMove = yCoords[1] - yCoords[0];
-		// Makes sure piece can't move past what is possible in one move
-		if(Math.abs(relativeYMove) > 2) {
-			return false;
-		}
-		if(Math.abs(relativeYMove) > 2) {
-			return false;
-		}
+		for(int i = 0; i < moveSquares.length-1; i++) {
+			// Ensures piece movement is in piece movement pattern
+			relativeXMove = xCoords[i+1] - xCoords[i];
+			relativeYMove = yCoords[i+1] - yCoords[i];
+			
+			// Makes sure piece can't move past what is possible in one move
+			if(Math.abs(relativeYMove) > 2 || Math.abs(relativeYMove) > 2) {
+				return false;
+			}
+			
+			// Ensures every move is a jump in a long string
+			if(!(Math.abs(relativeYMove) == 2 || Math.abs(relativeYMove) == 2) && moveSquares.length > 2) {
+				return false;
+			}
+			
+			// Makes sure general move is possible based on movement pattern
+			if(!board[xCoords[0]][yCoords[0]].moveShape[(int) (Math.signum(relativeYMove) + 1)][(int) Math.signum(relativeXMove) + 1]) {
+				return false;
+			}
 		
-		// Makes sure general move is possible based on movement pattern
-		if(Math.abs(relativeXMove) > 1) {
-			relativeXMove /= 2;
+			// Ensures no knight movement
+			if((Math.abs(relativeYMove) == 2 && Math.abs(relativeYMove) == 1) || 
+					(Math.abs(relativeYMove) == 1 && Math.abs(relativeYMove) == 2)) {
+				return false;
+			}
+			
+			// Checks for a piece to jump over
+			if((Math.abs(relativeYMove) == 2 || Math.abs(relativeYMove) == 2) && 
+					(board[(int) (xCoords[i] + Math.signum(relativeXMove))][(int) (yCoords[i] + Math.signum(relativeYMove))] == null)) {
+				return false;
+			}
 		}
-		if(Math.abs(relativeYMove) > 1) {
-			relativeYMove /= 2;
-		}
-		
-		if(!board[xCoords[0]][yCoords[0]].moveShape[relativeYMove + 1][relativeXMove + 1]) {
-			return false;
-		}
-		
 		
 		return true;
 	}
@@ -263,6 +279,7 @@ public class Board {
 		
 		for(int i = (tempRandom1+1)%8; i != tempRandom1; i = (i + 1) % 8) {
 			movingPiece = playerPieces[i][player];
+			System.out.println("\t\t\t"+movingPiece.color+"\t"+player);
 			System.out.println(movingPiece.getCoordinate()[1]);
 			for(int j = (tempRandom2+1)%8; j != tempRandom2; j = (j + 1) % 8) {
 				switch(j) {
@@ -316,7 +333,7 @@ public class Board {
 					//TODO remove testing output
 					System.out.println(moveString);
 					
-					if(checkLegal(moveString)) {
+					if(checkLegal(moveString, player)) {
 						movePiece(moveString);
 						return true;
 					}
