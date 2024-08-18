@@ -40,7 +40,10 @@ public class GameController {
 									 "Illegal move, you may land a piece on an empty, non-corner\nspace that it can reach with movement or jumping.",
 									 "Type \"c\" to continue."};
 	final String[] END_MESSAGE = 	{ "----------------------------------------------------------------------\n"
-									+ "*****                      Game is over                          *****\n"
+									+ "*****                        Game is over                        *****\n"
+									+ "----------------------------------------------------------------------",
+									  "----------------------------------------------------------------------\n"
+								    + "*****             Game is over (Maximum rounds taken)            *****\n"
 									+ "----------------------------------------------------------------------"};
 	static Board board;
 	static short players;
@@ -401,12 +404,9 @@ public class GameController {
 			currentTurns++;
 			
 			// Check whether game has ended
-			gameContinue = gameContinue && (!(currentTurns/4 >= maximumRounds) || !(maximumRounds > 0));
-			if(!gameContinue) {
-				break;
-			}
-			
+			gameContinue = gameContinue && !((currentTurns/4 >= maximumRounds) && (maximumRounds > 0));
 			gameContinue = gameContinue && !board.checkGameEnd(players);
+			
 			if(!gameContinue) {
 				break;
 			}
@@ -421,7 +421,11 @@ public class GameController {
 		for(int i = 0; i < printedBoard.length; i++) {
 			System.out.println(printedBoard[i]);
 		}
-		System.out.println(END_MESSAGE[0]);
+		if((currentTurns/4 >= maximumRounds) && (maximumRounds > 0)) {
+			System.out.println(END_MESSAGE[1]);
+		}else {
+			System.out.println(END_MESSAGE[0]);
+		}
 	}
 			
 }

@@ -382,7 +382,6 @@ public class Board {
 			
 			// Get strength of move string (low is strong)
 			currentMoveStrength = 9999;
-			System.out.println("This Move: " + allMoveStrings[i]);
 			for(int j = 0; j < boardWidth-2; j++) {
 				switch(player) {
 					case(0):
@@ -402,23 +401,42 @@ public class Board {
 						targetY = 1+j;
 						break;
 				}
-				
 				// Aim for spots without own piece
 				if((board[targetX][targetY] != null && board[targetX][targetY].color != player) || board[targetX][targetY] == null) {
 					
-					// Ending location distance
-					tempStrength = (int) (Math.pow(Math.abs(targetX-currentCoords[0]),2)+Math.pow(Math.abs(targetY-currentCoords[1]),2));
-					System.out.println("First: " + tempStrength);
-					// Subtract starting location distance
-					tempStrength -= (int) (Math.pow(Math.abs(targetX-(int)(tempSplitString[0].charAt(0)-'a')),2)+Math.pow(Math.abs(targetY-(boardHeight-Integer.parseInt(tempSplitString[0].substring(1)))),2));
-					System.out.println("Second: " + tempStrength);
-					if(tempStrength < currentMoveStrength) {
-						currentMoveStrength = tempStrength;
+					// Moving Horizontal or vertical
+					if(targetY == j+1) {
+						// Ending location distance
+						tempStrength = (int) Math.pow( 5*(Math.abs(targetX-currentCoords[0])) + (Math.abs(targetY-currentCoords[1])) ,2);
+						// Subtract starting location distance
+						tempStrength -= (int) Math.pow( 5*(Math.abs(targetX-(int)(tempSplitString[0].charAt(0)-'a'))) + (Math.abs(targetY-(boardHeight-Integer.parseInt(tempSplitString[0].substring(1))))) ,2);
+						
+						// Discourage waiting for opponent
+						if((board[targetX][targetY] != null)) {
+							tempStrength += 7;
+						}
+						
+						if(tempStrength < currentMoveStrength) {
+							currentMoveStrength = tempStrength;
+						}
+					}else {
+						// Ending location distance
+						tempStrength = (int) Math.pow( (Math.abs(targetX-currentCoords[0])) + 5*(Math.abs(targetY-currentCoords[1])) ,2);
+						// Subtract starting location distance
+						tempStrength -= (int) Math.pow( (Math.abs(targetX-(int)(tempSplitString[0].charAt(0)-'a'))) + 5*(Math.abs(targetY-(boardHeight-Integer.parseInt(tempSplitString[0].substring(1))))) ,2);
+						
+						// Discourage waiting for opponent
+						if((board[targetX][targetY] != null)) {
+							tempStrength += 7;
+						}
+						
+						if(tempStrength < currentMoveStrength) {
+							currentMoveStrength = tempStrength;
+						}
 					}
+					
 				}
-				System.out.println("Total: " + currentMoveStrength);
 			}
-			System.out.println("End For Check");
 			
 			// Compare string strength to old list overwriting move strings
 			if(currentMoveStrength == maxMoveStringStrength) {
@@ -432,12 +450,6 @@ public class Board {
 				allMoveStrings[endOfStrongMoveStrings] = currentMoveString;
 				endOfStrongMoveStrings++;
 			}
-			System.out.println("End Piece Check");
-		}
-		System.out.println("End Check" + endOfStrongMoveStrings);
-		
-		for(int i = 0; i < endOfStrongMoveStrings; i++) {
-			System.out.println("Strongest at " + maxMoveStringStrength + " is " + allMoveStrings[i]);
 		}
 		
 		if(endOfStrongMoveStrings > 0) {
@@ -516,7 +528,6 @@ public class Board {
 		int xRequired;
 		int yRequired;
 		int totalComplete;
-		
 		for(int i = 0; i < players; i++) {
 			totalComplete = 0;
 			xRequired = -1;
@@ -536,9 +547,9 @@ public class Board {
 					break;
 			}
 			for(int j = 0; j < playerPieces[i].length; j++) {
-				if(xRequired > 0 && playerPieces[i][j].getCoordinate()[0] == xRequired) {
+				if(xRequired > -1 && playerPieces[i][j].getCoordinate()[0] == xRequired) {
 					totalComplete++;
-				}else if(yRequired > 0 && playerPieces[i][j].getCoordinate()[1] == yRequired) {
+				}else if(yRequired > -1 && playerPieces[i][j].getCoordinate()[1] == yRequired) {
 					totalComplete++;
 				}
 			}
