@@ -91,7 +91,6 @@ public class GameController {
 		introSequence();
 		gameSequence();
 		endSequence();
-		System.out.println("Terminating...");
 	}
 	
 	// Runs the prompts and reads the inputs for the introduction

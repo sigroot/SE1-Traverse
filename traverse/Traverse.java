@@ -25,6 +25,8 @@ public class Traverse {
 		gameController = GameController.getGameController(board);
 		
 		gameController.run();
+		
+		System.out.println("Terminating...");
 	}
 
 }
