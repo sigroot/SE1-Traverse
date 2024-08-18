@@ -5,15 +5,14 @@
 // File name: Board.java
 // Purpose:	Represent the board of the game
 //
-// Limitations:	Cannot check moves involving jumps
+// Limitations:	AI cannot complete the game
 //
 // Development Computer: Framework 16
 // Operating System: Ubuntu 24.04
 // Integrated Development Environment (IDE): Eclipse 4.32.0
 // Compiler: Java JDK 17
 // Build Directions: See the Traverse class
-// Operational Status: 	Can set up the board and run the game
-//						Without jumps
+// Operational Status: 	Can run the game, but AI can't complete it.
 ///////////////////////////////////////////////////////////////////
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +22,7 @@ public class Board {
 	final int boardHeight = 10;
 	
 	Piece[][] board = new Piece[boardWidth][boardHeight];
-	Piece[][] playerPieces = new Piece[8][4];
+	Piece[][] playerPieces = new Piece[4][8];
 	
 	// Creates 8 pieces for each participating player and assigns 
 	// them to locations on the board.
@@ -59,27 +58,25 @@ public class Board {
 			for(short j = 0; j < 8; j++) {
 				switch(i) {
 					case 0:
-						newPieces.get(j).setCoordinate(1+j, 9);
-						playerPieces[j][i] = newPieces.get(j);
-						board[1+j][9] = newPieces.get(j);
+						newPieces.get(j).setCoordinate(1+j, boardHeight-1);
+						playerPieces[i][j] = newPieces.get(j);
+						board[1+j][boardHeight-1] = newPieces.get(j);
 						break;
 					case 1:
 						newPieces.get(j).setCoordinate(1+j, 0);
-						playerPieces[j][i] = newPieces.get(j);
+						playerPieces[i][j] = newPieces.get(j);
 						board[1+j][0] = newPieces.get(j);
 						break;
 					case 2:
-						newPieces.get(j).setCoordinate(9, 1+j);
-						playerPieces[j][i] = newPieces.get(j);
-						board[9][1+j] = newPieces.get(j);
+						newPieces.get(j).setCoordinate(boardWidth-1, 1+j);
+						playerPieces[i][j] = newPieces.get(j);
+						board[boardWidth-1][1+j] = newPieces.get(j);
 						break;
 					case 3:
 						newPieces.get(j).setCoordinate(0, 1+j);
-						playerPieces[j][i] = newPieces.get(j);
+						playerPieces[i][j] = newPieces.get(j);
 						board[0][1+j] = newPieces.get(j);
 						break;
-					default:
-						// Is a Stub
 				}
 			}
 			// Empties List
@@ -123,18 +120,13 @@ public class Board {
 		
 		// Ensure correct range of inputs
 		for(int i = 0; i < moveSquares.length; i++) {
-			if(moveSquares[i].charAt(0) < 'a' || moveSquares[i].charAt(0) > 'j') {
+			if(moveSquares[i].charAt(0) < 'a' || moveSquares[i].charAt(0) > ('a'+boardHeight-1)) {
 				return false;
 			}
-			if(moveSquares[i].length() > 2) {
-				if(!moveSquares[i].substring(1,3).equals("10")){
-					return false;
-				}
-			}else {
-				if(moveSquares[i].charAt(1) < '1' || moveSquares[i].charAt(1) > '9') {
-					return false;
-				}
+			if(Integer.parseInt(moveSquares[i].substring(1)) < 1 || Integer.parseInt(moveSquares[i].substring(1)) > boardHeight) {
+				return false;
 			}
+			
 		}
 		
 		// Ensure legality
@@ -142,17 +134,19 @@ public class Board {
 		// Divide each move into x and y locations
 		for (int i = 0; i < moveSquares.length; i++) {
 			xCoordinate = ((int) moveSquares[i].charAt(0))-'a';
-			if(moveSquares[i].length() > 2) {
-				yCoordinate = 0;
-			}else {
-				yCoordinate = 9-((int) moveSquares[i].charAt(1)-'1');
-			}
+			yCoordinate = (boardHeight)-Integer.parseInt(moveSquares[i].substring(1));
+			
 			
 			if(board[xCoordinate][yCoordinate] != null && i > 0) {
 				return false;
 			}
 			xCoords[i] = xCoordinate;
 			yCoords[i] = yCoordinate;
+		}
+		
+		// Ensure start is a piece
+		if(board[xCoords[0]][yCoords[0]] == null) {
+			return false;
 		}
 		
 		// Ensure piece is player's piece
@@ -165,13 +159,13 @@ public class Board {
 		if(xCoords[moveSquares.length-1] == 0 && yCoords[moveSquares.length-1] == 0) {
 			return false;
 		}
-		if(xCoords[moveSquares.length-1] == 9 && yCoords[moveSquares.length-1] == 0) {
+		if(xCoords[moveSquares.length-1] == boardWidth-1 && yCoords[moveSquares.length-1] == 0) {
 			return false;
 		}
-		if(xCoords[moveSquares.length-1] == 0 && yCoords[moveSquares.length-1] == 9) {
+		if(xCoords[moveSquares.length-1] == 0 && yCoords[moveSquares.length-1] == boardHeight-1) {
 			return false;
 		}
-		if(xCoords[moveSquares.length-1] == 9 && yCoords[moveSquares.length-1] == 9) {
+		if(xCoords[moveSquares.length-1] == boardWidth-1 && yCoords[moveSquares.length-1] == boardHeight-1) {
 			return false;
 		}
 		
@@ -220,6 +214,7 @@ public class Board {
 		return true;
 	}
 	
+	// Swaps the contents of two spaces on the board
 	// Swaps the contents of two items in board.
 	boolean movePiece(String space1, String space2) {
 		int xCoordinate1;
@@ -231,17 +226,10 @@ public class Board {
 		
 	
 		xCoordinate1 = ((int) space1.charAt(0))-'a';
-		if(space1.length() > 2) {
-			yCoordinate1 = 0;
-		}else {
-			yCoordinate1 = 9-((int) space1.charAt(1)-'1');
-		}
+		yCoordinate1 = (boardHeight)-(Integer.parseInt(space1.substring(1)));
+		
 		xCoordinate2 = ((int) space2.charAt(0))-'a';
-		if(space2.length() > 2) {
-			yCoordinate2 = 0;
-		}else {
-			yCoordinate2 = 9-((int) space2.charAt(1)-'1');
-		}
+		yCoordinate2 = (boardHeight-1)-(Integer.parseInt(space2.substring(1))-1);
 		
 		piece1 = board[xCoordinate1][yCoordinate1];
 		piece2 = board[xCoordinate2][yCoordinate2];
@@ -260,6 +248,8 @@ public class Board {
 	}
 	
 	// Moves a piece using a full movement string
+	
+	// Moves pieces based on a movement string
 	boolean movePiece(String movement) {
 		String[] moveSquares = movement.split("-");
 		String space1 = moveSquares[0];
@@ -267,80 +257,197 @@ public class Board {
 		return movePiece(space1, space2);
 	}
 	
-	// Makes a CPU move for a given player.
+	
+	// Makes a CPU move for a given player. (AI cannot complete game)
 	boolean movePlayer(short player) {
-		// TODO Is a Stub
-		Piece movingPiece;
-		int tempRandom1 = (int) Math.floor(Math.random()*8);
-		int tempRandom2 = (int) Math.floor(Math.random()*8);
+		int[] currentCoords = new int[2];
 		int relativeXMove = 0;
 		int relativeYMove = 0;
-		String moveString;
+		String currentMoveString;
+		String tempString;
+		String[] allMoveStrings = new String[512];
+		String[] tempSplitString;
+		int allMoveStringsPointer = 0;
+		int tempStrength = 0;
+		int currentMoveStrength = 0;
+		int maxMoveStringStrength = 0;
+		int endOfStrongMoveStrings = 0;
 		
-		for(int i = (tempRandom1+1)%8; i != tempRandom1; i = (i + 1) % 8) {
-			movingPiece = playerPieces[i][player];
-			System.out.println("\t\t\t"+movingPiece.color+"\t"+player);
-			System.out.println(movingPiece.getCoordinate()[1]);
-			for(int j = (tempRandom2+1)%8; j != tempRandom2; j = (j + 1) % 8) {
-				switch(j) {
-					case 0:
-						relativeXMove = 0;
-						relativeYMove = -1;
-						break;
-					case 1:
-						relativeXMove = 1;
-						relativeYMove = -1;
-						break;
-					case 2:
-						relativeXMove = 1;
-						relativeYMove = 0;
-						break;
-					case 3:
-						relativeXMove = 1;
-						relativeYMove = 1;
-						break;
-					case 4:
-						relativeXMove = 0;
-						relativeYMove = 1;
-						break;
-					case 5:
-						relativeXMove = -1;
-						relativeYMove = 1;
-						break;
-					case 6:
-						relativeXMove = -1;
-						relativeYMove = 0;
-						break;
-					case 7:
-						relativeXMove = -1;
-						relativeYMove = -1;
-						break;
-				}
+		// Makes a list of every legal movement string
+		for(int i = 0; i < playerPieces[player].length; i++) {
+			
+			// Adds the starting location to the movement string
+			currentCoords = playerPieces[player][i].getCoordinate();
+			currentMoveString = (char) (currentCoords[0]+'a') + Integer.toString(boardHeight-currentCoords[1]);
+			
+			// Remove finished pieces from the running (helps wonky AI)
+			if(player == 0 && currentCoords[1] == 0) {
+				continue;
+			}if(player == 1 && currentCoords[1] == boardHeight-1) {
+				continue;
+			}if(player == 2 && currentCoords[0] == 0) {
+				continue;
+			}if(player == 3 && currentCoords[0] == boardWidth-1) {
+				continue;
+			}
+			
+			allMoveStrings[allMoveStringsPointer] = currentMoveString;
+			
+			
+			
+			// Performs a breadth-first-search of all potential movements from the first movement string
+			while(allMoveStrings[allMoveStringsPointer] != null) {
 				
-				if(movingPiece.moveShape[relativeYMove + 1][relativeXMove + 1] && 
-						movingPiece.getCoordinate()[0] + relativeXMove > 0 && 
-						movingPiece.getCoordinate()[0] + relativeXMove < 10 && 
-						10-movingPiece.getCoordinate()[1] + relativeYMove > 0 && 
-						10-movingPiece.getCoordinate()[1] + relativeYMove < 10) {
+				// Gets end coordinate of next movement string
+				currentMoveString = allMoveStrings[allMoveStringsPointer];
+				tempString = currentMoveString.split("-")[currentMoveString.split("-").length-1];
+				currentCoords[0] = (int) (tempString.charAt(0)-'a');
+				currentCoords[1] = boardHeight-Integer.parseInt(tempString.substring(1));
+				
+				for(int j = 0; j < 8; j++) {
+					// Checks all 8 moves starting from facing up and turning clockwise
+					relativeXMove = -(int)(Math.signum(j%4) * Math.signum(j-4));
+					relativeYMove = -(int)(Math.signum((j+2)%4) * Math.signum(j-2) * Math.signum(j-6));
 					
-					moveString = "";
-					moveString += (char)(movingPiece.getCoordinate()[0] + 'a');
-					moveString += Integer.toString(10-movingPiece.getCoordinate()[1]);
-					moveString += "-";
-					moveString += (char)(movingPiece.getCoordinate()[0] + 'a' + relativeXMove);
-					moveString += Integer.toString(10-movingPiece.getCoordinate()[1] + relativeYMove);
-					
-					//TODO remove testing output
-					System.out.println(moveString);
-					
-					if(checkLegal(moveString, player)) {
-						movePiece(moveString);
-						return true;
+					// Skips if move is off the board
+					if (currentCoords[0] + relativeXMove > boardWidth-1 || 
+							currentCoords[0] + relativeXMove < 0 || 
+							currentCoords[1] + relativeYMove > boardHeight-1 ||
+							currentCoords[1] + relativeYMove < 0 ) {
+						continue;
 					}
+					
+					// If a piece is on the attempted location, attempt a jump
+					if (board[currentCoords[0] + relativeXMove][currentCoords[1] + relativeYMove] != null) {
+						
+						// Skips if jump is off the board
+						if (currentCoords[0] + 2*relativeXMove > boardWidth-1 || 
+								currentCoords[0] + 2*relativeXMove < 0 || 
+								currentCoords[1] + 2*relativeYMove > boardHeight-1 ||
+								currentCoords[1] + 2*relativeYMove < 0 ) {
+							continue;
+						}
+						
+						// Skips if the attempted jump location has a piece
+						if (board[currentCoords[0] + 2*relativeXMove][currentCoords[1] + 2*relativeYMove] != null) {
+							continue;
+						}else {
+							
+							// If the attempted jump location is empty, check its legality
+							tempString = currentMoveString + '-' + (char) ((currentCoords[0] + 2*relativeXMove)+'a') + Integer.toString(10-(currentCoords[1] + 2*relativeYMove));
+							if(checkLegal(tempString, player)) {
+								
+								// All checks cleared, add it to the list
+								allMoveStrings[allMoveStringsPointer] = tempString;
+								allMoveStringsPointer++;
+							}
+							continue;
+						}
+					}else {
+						
+						// If the attempted location is empty, check its legality
+						tempString = currentMoveString + '-' + (char) ((currentCoords[0]+relativeXMove)+'a') + Integer.toString(10-(currentCoords[1]+relativeYMove));
+						
+						if(checkLegal(tempString, player)) {
+							
+							// All checks cleared, add it to the list
+							allMoveStrings[allMoveStringsPointer] = tempString;
+							allMoveStringsPointer++;
+						}
+						continue;
+					}
+				}
+				// If a string of two moves or more was not added, remove the piece from consideration
+				if(currentMoveString.split("-").length < 2) {
+					allMoveStrings[allMoveStringsPointer] = null;
 				}
 			}
 		}
-		return false;
+		
+		// Filters the allMoveStrings list to only the highest strength
+		maxMoveStringStrength = 100;
+		endOfStrongMoveStrings = 0;
+		for(int i = 0; allMoveStrings[i] != null; i++) {
+			
+			
+			currentMoveString = allMoveStrings[i];
+			tempSplitString = currentMoveString.split("-");
+			if(tempSplitString.length < 2) {
+				continue;
+			}
+			currentCoords[0] = (int) (tempSplitString[tempSplitString.length-1].charAt(0)-'a');
+			currentCoords[1] = 10-Integer.parseInt(tempSplitString[tempSplitString.length-1].substring(1));
+			
+			// Get strength of move string (low is strong)
+			currentMoveStrength = 100;
+			for(int j = 0; j < boardWidth-2; j++) {
+				switch(player) {
+					case(0):
+						if(board[1+j][0] != null) {
+							if(board[1+j][0].color != player) {
+								tempStrength = Math.abs(1+j-currentCoords[0])+Math.abs(0-currentCoords[1]);
+								tempStrength -= Math.abs(1+j-(int)(tempSplitString[0].charAt(0)-'a'))+Math.abs(0-(10-Integer.parseInt(tempSplitString[0].substring(1))));
+								if(tempStrength < currentMoveStrength) {
+									currentMoveStrength = tempStrength;
+								}
+							}
+						}
+						break;
+					case(1):
+						if(board[1+j][boardHeight-1] != null) {
+							if(board[1+j][boardHeight-1].color != player) {
+								tempStrength = Math.abs(1+j-currentCoords[0])+Math.abs((boardHeight-1)-currentCoords[1]);
+								tempStrength -= Math.abs(1+j-(int)(tempSplitString[0].charAt(0)-'a'))+Math.abs((boardHeight-1)-(10-Integer.parseInt(tempSplitString[0].substring(1))));
+								if(tempStrength < currentMoveStrength) {
+									currentMoveStrength = tempStrength;
+								}
+							}
+						}
+						break;
+					case(2):
+						if(board[0][1+j] != null) {
+							if(board[0][1+j].color != player) {
+								tempStrength = Math.abs(0-currentCoords[0])+Math.abs(1+j-currentCoords[1]);
+								tempStrength -= Math.abs(0-(int)(tempSplitString[0].charAt(0)-'a'))+Math.abs(1+j-(10-Integer.parseInt(tempSplitString[0].substring(1))));
+								if(tempStrength < currentMoveStrength) {
+									currentMoveStrength = tempStrength;
+								}
+							}
+						}
+						break;
+					case(3):
+						if(board[boardWidth-1][1+j] != null) {
+							if(board[boardWidth-1][1+j].color != player) {
+								tempStrength = Math.abs((boardWidth-1)-currentCoords[0])+Math.abs(1+j-currentCoords[1]);
+								tempStrength -= Math.abs((boardWidth-1)-(int)(tempSplitString[0].charAt(0)-'a'))+Math.abs(1+j-(10-Integer.parseInt(tempSplitString[0].substring(1))));
+								if(tempStrength < currentMoveStrength) {
+									currentMoveStrength = tempStrength;
+								}
+							}
+						}
+						break;
+				}
+			}
+			
+			// Compare string strength to old list overwriting move strings
+			if(currentMoveStrength == maxMoveStringStrength) {
+				allMoveStrings[endOfStrongMoveStrings] = currentMoveString;
+				endOfStrongMoveStrings++;
+			}
+			if(currentMoveStrength < maxMoveStringStrength) {
+				maxMoveStringStrength++;
+				endOfStrongMoveStrings = 0;
+				maxMoveStringStrength = currentMoveStrength;
+				allMoveStrings[endOfStrongMoveStrings] = currentMoveString;
+				endOfStrongMoveStrings++;
+			}
+		}
+		if(endOfStrongMoveStrings > 0) {
+			movePiece(allMoveStrings[(int)Math.random()*endOfStrongMoveStrings]);
+			return true;
+		}else {
+			return false;
+		}
 	}
 	
 	// Returns an ASCII representation of the current board.
@@ -407,8 +514,40 @@ public class Board {
 	}
 	
 	// Determines whether the board is in a game ending state.
-	boolean checkGameEnd() {
-		// TODO Is a Stub
+	boolean checkGameEnd(short players) {
+		int xRequired;
+		int yRequired;
+		int totalComplete;
+		
+		for(int i = 0; i < players; i++) {
+			totalComplete = 0;
+			xRequired = -1;
+			yRequired = -1;
+			switch(i) {
+				case 0:
+					yRequired = 0;
+					break;
+				case 1:
+					yRequired = boardHeight-1;
+					break;
+				case 2:
+					xRequired = 0;
+					break;
+				case 3:
+					xRequired = boardWidth-1;
+					break;
+			}
+			for(int j = 0; j < playerPieces[i].length; j++) {
+				if(xRequired > 0 && playerPieces[i][j].getCoordinate()[0] == xRequired) {
+					totalComplete++;
+				}else if(yRequired > 0 && playerPieces[i][j].getCoordinate()[1] == yRequired) {
+					totalComplete++;
+				}
+			}
+			if(totalComplete >= playerPieces[i].length) {
+				return true;
+			}
+		}
 		return false;
 	}
 }

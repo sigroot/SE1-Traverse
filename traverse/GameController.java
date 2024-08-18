@@ -6,14 +6,13 @@
 // Purpose:	Manage the game operations
 //
 // Limitations:	Is a Singleton
-//				Cannot run the end sequence
 //
 // Development Computer: Framework 16
 // Operating System: Ubuntu 24.04
 // Integrated Development Environment (IDE): Eclipse 4.32.0
 // Compiler: Java JDK 17
 // Build Directions: See the Traverse class
-// Operational Status: Runs the introduction and a round of the game
+// Operational Status: Runs the game
 ///////////////////////////////////////////////////////////////////
 import java.util.Scanner;
 
@@ -40,8 +39,9 @@ public class GameController {
 									 "Enter a string of coordinates separated by dashes to make\na legal move. (eg. :> c3-c5-e5)",
 									 "Illegal move, you may land a piece on an empty, non-corner\nspace that it can reach with movement or jumping.",
 									 "Type \"c\" to continue."};
-	final String[] END_MESSAGE = 	{"",
-									 ""};
+	final String[] END_MESSAGE = 	{ "----------------------------------------------------------------------\n"
+									+ "*****                      Game is over                          *****\n"
+									+ "----------------------------------------------------------------------"};
 	static Board board;
 	static short players;
 	static boolean humanPlayer;
@@ -64,7 +64,7 @@ public class GameController {
 		GameController.board = board;
 		players = 4;
 		humanPlayer = true;
-		maximumRounds = 10;
+		maximumRounds = 0;
 		currentTurns = 0;
 		boardDisplayMode = 1;
 		return gameControllerSingleton;
@@ -105,14 +105,17 @@ public class GameController {
 		
 		//First menu
 		while (!menuInput.equals("e") && !menuInput.equals("4")) {
+			
 			System.out.println(INTRO_MESSAGE[0]);
 			System.out.println(INTRO_MESSAGE[1]);
 			System.out.println(INTRO_MESSAGE[4]);
 			System.out.println(INTRO_MESSAGE[6]);
 			System.out.println(INTRO_MESSAGE[11]);
 			menuInput = getKeyboard(":> ");
+			
 			if(menuInput.equals("1") || menuInput.equals("p")) {
 				menuInput = "";
+				
 				while(!menuInput.equals("y") && !menuInput.equals("n")) {
 					System.out.println(INTRO_MESSAGE[2]);
 					menuInput = getKeyboard(":> ");
@@ -124,6 +127,7 @@ public class GameController {
 						System.out.println(INTRO_MESSAGE[12]);
 					}
 				}
+				
 				while(!menuInput.equals("2") && !menuInput.equals("3") && !menuInput.equals("4")) {
 					System.out.println(INTRO_MESSAGE[3]);
 					menuInput = getKeyboard(":> ");
@@ -137,11 +141,15 @@ public class GameController {
 						System.out.println(INTRO_MESSAGE[12]);
 					}
 				}
+				
 			}else if(menuInput.equals("2") || menuInput.equals("r")) {
 				menuInput = "";
 				trySucceed = false;
+				
 				while(!trySucceed) {
+					
 					System.out.println(INTRO_MESSAGE[5]);
+					
 					try {
 						menuInput = getKeyboard(":> ");
 						maximumRounds = Integer.parseInt(menuInput);
@@ -154,13 +162,15 @@ public class GameController {
 				
 			}else if(menuInput.equals("3") || menuInput.equals("d")) {
 				menuInput = "";
+				
 				while(!menuInput.equals("1") && !menuInput.equals("2") && !menuInput.equals("3")) {
+					
 					System.out.println(INTRO_MESSAGE[7]);
 					System.out.println(INTRO_MESSAGE[8]);
 					System.out.println(INTRO_MESSAGE[9]);
 					System.out.println(INTRO_MESSAGE[10]);
-					
 					menuInput = getKeyboard(":> ");
+					
 					if(menuInput.equals("1")) {
 						boardDisplayMode = 1;
 					}else if(menuInput.equals("2")) {
@@ -170,7 +180,9 @@ public class GameController {
 					}else {
 						System.out.println(INTRO_MESSAGE[12]);
 					}
+					
 				}
+				
 			}else if(menuInput.equals("4") || menuInput.equals("e")) {
 				menuInput = "";
 				System.out.println(INTRO_MESSAGE[13]);
@@ -292,9 +304,11 @@ public class GameController {
 		String gameInput = "";
 		String[] printedBoard;
 		short movingPlayer;
+		
 		// Ensure game is in playable state
 		gameContinue = gameContinue && ((currentTurns/players < maximumRounds) || !(maximumRounds > 0));
-		gameContinue = gameContinue && !board.checkGameEnd();
+		gameContinue = gameContinue && !board.checkGameEnd(players);
+		
 		while(gameContinue) {
 			// Reset player input
 			gameInput = "";
@@ -332,24 +346,25 @@ public class GameController {
 				System.out.print(currentTurns%players);
 				System.out.println(GAME_MESSAGE[1]);
 				
-				// TODO Player moves their piece
+				// Player moves their piece
 				while(!board.checkLegal(gameInput, (short) 0)) {
 					System.out.println(GAME_MESSAGE[2]);
 					gameInput = getKeyboard(":> ");
-					gameInput = board.cleanMoveString(gameInput);
-					//TODO remove testing output
-					System.out.println("\n"+gameInput+"\n");
-					if(board.checkLegal(gameInput, movingPlayer)) {
-						board.movePiece(gameInput);
+					if(gameInput.length() > 2) {
+						gameInput = board.cleanMoveString(gameInput);
 						
-						printedBoard = board.printBoard();
-						for(int i = 0; i < printedBoard.length; i++) {
-							System.out.println(printedBoard[i]);
+						if(board.checkLegal(gameInput, movingPlayer)) {
+							board.movePiece(gameInput);
+							
+							printedBoard = board.printBoard();
+							for(int i = 0; i < printedBoard.length; i++) {
+								System.out.println(printedBoard[i]);
+							}
+							
+							System.out.println(GAME_MESSAGE[4]);
+							gameInput = getKeyboard(":> ");
+							break;
 						}
-						
-						System.out.println(GAME_MESSAGE[4]);
-						gameInput = getKeyboard(":> ");
-						break;
 					}
 					// Reset gameInput
 					gameInput = "";
@@ -380,6 +395,7 @@ public class GameController {
 				
 				System.out.println(GAME_MESSAGE[4]);
 				gameInput = getKeyboard(":> ");
+				
 			}else {
 				board.movePlayer((short) (movingPlayer));
 			}
@@ -388,24 +404,25 @@ public class GameController {
 			// Check whether game has ended
 			gameContinue = gameContinue && (!(currentTurns/4 >= maximumRounds) || !(maximumRounds > 0));
 			if(!gameContinue) {
-				printedBoard = board.printBoard();
-				for(int i = 0; i < printedBoard.length; i++) {
-					System.out.println(printedBoard[i]);
-				}
+				break;
 			}
-			gameContinue = gameContinue && !board.checkGameEnd();
+			
+			gameContinue = gameContinue && !board.checkGameEnd(players);
 			if(!gameContinue) {
-				printedBoard = board.printBoard();
-				for(int i = 0; i < printedBoard.length; i++) {
-					System.out.println(printedBoard[i]);
-				}
+				break;
 			}
+			
 		}
 	}
 	
 	// Runs the end of the game and informs the player of the conclusion
 	void endSequence() {
-		// Is a Stub
+		// Print the board
+		String[] printedBoard = board.printBoard();
+		for(int i = 0; i < printedBoard.length; i++) {
+			System.out.println(printedBoard[i]);
+		}
+		System.out.println(END_MESSAGE[0]);
 	}
 			
 }

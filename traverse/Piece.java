@@ -31,7 +31,8 @@ public abstract class Piece {
 	
 	// Returns the ASCII representation.
 	String[] GetAscii(){
-		return asciiImage;
+		String[] returnAscii = asciiImage.clone();
+		return returnAscii;
 	}
 	
 	void assignSide(short color) {
@@ -58,11 +59,13 @@ public abstract class Piece {
 	
 	// Returns the current value of the coordinate variable.
 	int[] getCoordinate() {
-		return coordinate;
+		int[] returnCoordinates = coordinate.clone();
+		return returnCoordinates;
 	}
 	
 	// Returns the locations the piece can move to.
 	boolean[][] moveShape(){
-		return moveShape;
+		boolean[][] returnMoveShape = moveShape.clone();
+		return returnMoveShape;
 	}
 }
