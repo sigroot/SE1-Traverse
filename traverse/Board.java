@@ -20,6 +20,7 @@ import java.util.Collections;
 public class Board {
 	final int boardWidth = 10;
 	final int boardHeight = 10;
+	final float directMoveWeight = 3;
 	
 	Piece[][] board = new Piece[boardWidth][boardHeight];
 	Piece[][] playerPieces = new Piece[4][8];
@@ -407,9 +408,9 @@ public class Board {
 					// Moving Horizontal or vertical
 					if(targetY == j+1) {
 						// Ending location distance
-						tempStrength = (int) Math.pow( 5*(Math.abs(targetX-currentCoords[0])) + (Math.abs(targetY-currentCoords[1])) ,2);
+						tempStrength = (int) Math.pow( directMoveWeight*(Math.abs(targetX-currentCoords[0])) + (Math.abs(targetY-currentCoords[1])) ,2);
 						// Subtract starting location distance
-						tempStrength -= (int) Math.pow( 5*(Math.abs(targetX-(int)(tempSplitString[0].charAt(0)-'a'))) + (Math.abs(targetY-(boardHeight-Integer.parseInt(tempSplitString[0].substring(1))))) ,2);
+						tempStrength -= (int) Math.pow( directMoveWeight*(Math.abs(targetX-(int)(tempSplitString[0].charAt(0)-'a'))) + (Math.abs(targetY-(boardHeight-Integer.parseInt(tempSplitString[0].substring(1))))) ,2);
 						
 						// Discourage waiting for opponent
 						if((board[targetX][targetY] != null)) {
@@ -421,9 +422,9 @@ public class Board {
 						}
 					}else {
 						// Ending location distance
-						tempStrength = (int) Math.pow( (Math.abs(targetX-currentCoords[0])) + 5*(Math.abs(targetY-currentCoords[1])) ,2);
+						tempStrength = (int) Math.pow( (Math.abs(targetX-currentCoords[0])) + directMoveWeight*(Math.abs(targetY-currentCoords[1])) ,2);
 						// Subtract starting location distance
-						tempStrength -= (int) Math.pow( (Math.abs(targetX-(int)(tempSplitString[0].charAt(0)-'a'))) + 5*(Math.abs(targetY-(boardHeight-Integer.parseInt(tempSplitString[0].substring(1))))) ,2);
+						tempStrength -= (int) Math.pow( (Math.abs(targetX-(int)(tempSplitString[0].charAt(0)-'a'))) + directMoveWeight*(Math.abs(targetY-(boardHeight-Integer.parseInt(tempSplitString[0].substring(1))))) ,2);
 						
 						// Discourage waiting for opponent
 						if((board[targetX][targetY] != null)) {
