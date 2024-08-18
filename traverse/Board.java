@@ -113,8 +113,8 @@ public class Board {
 		int relativeXMove = 0;
 		int relativeYMove = 0;
 		
-		// Ensure the input uses between two and four spaces;
-		if(moveSquares.length < 2 || moveSquares.length > 3) {
+		// Ensure the input uses more than 1 board space;
+		if(moveSquares[0].length() < 2) {
 			return false;
 		}
 		
@@ -272,6 +272,8 @@ public class Board {
 		int currentMoveStrength = 0;
 		int maxMoveStringStrength = 0;
 		int endOfStrongMoveStrings = 0;
+		int targetX = 0;
+		int targetY = 0;
 		
 		// Makes a list of every legal movement string
 		for(int i = 0; i < playerPieces[player].length; i++) {
@@ -365,7 +367,7 @@ public class Board {
 		}
 		
 		// Filters the allMoveStrings list to only the highest strength
-		maxMoveStringStrength = 100;
+		maxMoveStringStrength = 9999;
 		endOfStrongMoveStrings = 0;
 		for(int i = 0; allMoveStrings[i] != null; i++) {
 			
@@ -379,55 +381,44 @@ public class Board {
 			currentCoords[1] = 10-Integer.parseInt(tempSplitString[tempSplitString.length-1].substring(1));
 			
 			// Get strength of move string (low is strong)
-			currentMoveStrength = 100;
+			currentMoveStrength = 9999;
+			System.out.println("This Move: " + allMoveStrings[i]);
 			for(int j = 0; j < boardWidth-2; j++) {
 				switch(player) {
 					case(0):
-						if(board[1+j][0] != null) {
-							if(board[1+j][0].color != player) {
-								tempStrength = Math.abs(1+j-currentCoords[0])+Math.abs(0-currentCoords[1]);
-								tempStrength -= Math.abs(1+j-(int)(tempSplitString[0].charAt(0)-'a'))+Math.abs(0-(10-Integer.parseInt(tempSplitString[0].substring(1))));
-								if(tempStrength < currentMoveStrength) {
-									currentMoveStrength = tempStrength;
-								}
-							}
-						}
+						targetX = 1+j;
+						targetY = 0;
 						break;
 					case(1):
-						if(board[1+j][boardHeight-1] != null) {
-							if(board[1+j][boardHeight-1].color != player) {
-								tempStrength = Math.abs(1+j-currentCoords[0])+Math.abs((boardHeight-1)-currentCoords[1]);
-								tempStrength -= Math.abs(1+j-(int)(tempSplitString[0].charAt(0)-'a'))+Math.abs((boardHeight-1)-(10-Integer.parseInt(tempSplitString[0].substring(1))));
-								if(tempStrength < currentMoveStrength) {
-									currentMoveStrength = tempStrength;
-								}
-							}
-						}
+						targetX = 1+j;
+						targetY = boardHeight-1;
 						break;
 					case(2):
-						if(board[0][1+j] != null) {
-							if(board[0][1+j].color != player) {
-								tempStrength = Math.abs(0-currentCoords[0])+Math.abs(1+j-currentCoords[1]);
-								tempStrength -= Math.abs(0-(int)(tempSplitString[0].charAt(0)-'a'))+Math.abs(1+j-(10-Integer.parseInt(tempSplitString[0].substring(1))));
-								if(tempStrength < currentMoveStrength) {
-									currentMoveStrength = tempStrength;
-								}
-							}
-						}
+						targetX = 0;
+						targetY = 1+j;
 						break;
 					case(3):
-						if(board[boardWidth-1][1+j] != null) {
-							if(board[boardWidth-1][1+j].color != player) {
-								tempStrength = Math.abs((boardWidth-1)-currentCoords[0])+Math.abs(1+j-currentCoords[1]);
-								tempStrength -= Math.abs((boardWidth-1)-(int)(tempSplitString[0].charAt(0)-'a'))+Math.abs(1+j-(10-Integer.parseInt(tempSplitString[0].substring(1))));
-								if(tempStrength < currentMoveStrength) {
-									currentMoveStrength = tempStrength;
-								}
-							}
-						}
+						targetX = boardWidth-1;
+						targetY = 1+j;
 						break;
 				}
+				
+				// Aim for spots without own piece
+				if((board[targetX][targetY] != null && board[targetX][targetY].color != player) || board[targetX][targetY] == null) {
+					
+					// Ending location distance
+					tempStrength = (int) (Math.pow(Math.abs(targetX-currentCoords[0]),2)+Math.pow(Math.abs(targetY-currentCoords[1]),2));
+					System.out.println("First: " + tempStrength);
+					// Subtract starting location distance
+					tempStrength -= (int) (Math.pow(Math.abs(targetX-(int)(tempSplitString[0].charAt(0)-'a')),2)+Math.pow(Math.abs(targetY-(boardHeight-Integer.parseInt(tempSplitString[0].substring(1)))),2));
+					System.out.println("Second: " + tempStrength);
+					if(tempStrength < currentMoveStrength) {
+						currentMoveStrength = tempStrength;
+					}
+				}
+				System.out.println("Total: " + currentMoveStrength);
 			}
+			System.out.println("End For Check");
 			
 			// Compare string strength to old list overwriting move strings
 			if(currentMoveStrength == maxMoveStringStrength) {
@@ -441,7 +432,14 @@ public class Board {
 				allMoveStrings[endOfStrongMoveStrings] = currentMoveString;
 				endOfStrongMoveStrings++;
 			}
+			System.out.println("End Piece Check");
 		}
+		System.out.println("End Check" + endOfStrongMoveStrings);
+		
+		for(int i = 0; i < endOfStrongMoveStrings; i++) {
+			System.out.println("Strongest at " + maxMoveStringStrength + " is " + allMoveStrings[i]);
+		}
+		
 		if(endOfStrongMoveStrings > 0) {
 			movePiece(allMoveStrings[(int)Math.random()*endOfStrongMoveStrings]);
 			return true;
