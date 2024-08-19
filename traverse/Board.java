@@ -115,7 +115,7 @@ public class Board {
 		int relativeYMove = 0;
 		
 		// Ensure the input uses more than 1 board space;
-		if(moveSquares[0].length() < 2) {
+		if(moveSquares.length < 2) {
 			return false;
 		}
 		
@@ -136,7 +136,6 @@ public class Board {
 		for (int i = 0; i < moveSquares.length; i++) {
 			xCoordinate = ((int) moveSquares[i].charAt(0))-'a';
 			yCoordinate = (boardHeight)-Integer.parseInt(moveSquares[i].substring(1));
-			
 			
 			if(board[xCoordinate][yCoordinate] != null && i > 0) {
 				return false;

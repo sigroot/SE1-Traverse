@@ -36,7 +36,7 @@ public class GameController {
     								 "<<<Corner Spaces are invalid, please try again.>>>"};
 	final String[] GAME_MESSAGE = 	{"Player #",
 									 "'s move:",
-									 "Enter a string of coordinates separated by dashes to make\na legal move. (eg. :> c3-c5-e5)",
+									 "Enter a string of coordinates separated by dashes to make\na legal move, (eg. :> c3-c5-e5) or \"skip\" for the \ncomputer to attempt a move",
 									 "Illegal move, you may land a piece on an empty, non-corner\nspace that it can reach with movement or jumping.",
 									 "Type \"c\" to continue."};
 	final String[] END_MESSAGE = 	{ "--------------------------------------------------------------------\n"
@@ -67,7 +67,7 @@ public class GameController {
 		GameController.board = board;
 		players = 4;
 		humanPlayer = true;
-		maximumRounds = 0;
+		maximumRounds = 500;
 		currentTurns = 0;
 		boardDisplayMode = 1;
 		return gameControllerSingleton;
@@ -353,6 +353,13 @@ public class GameController {
 					System.out.println(GAME_MESSAGE[2]);
 					gameInput = getKeyboard(":> ");
 					if(gameInput.length() > 2) {
+						
+						// Allow the player to attempt to skip
+						if(gameInput.equals("skip")) {
+							board.movePlayer((short) (movingPlayer));
+							break;
+						}
+						
 						gameInput = board.cleanMoveString(gameInput);
 						
 						if(board.checkLegal(gameInput, movingPlayer)) {
@@ -367,6 +374,7 @@ public class GameController {
 							gameInput = getKeyboard(":> ");
 							break;
 						}
+						
 					}
 					// Reset gameInput
 					gameInput = "";
@@ -426,6 +434,7 @@ public class GameController {
 		}else {
 			System.out.println(END_MESSAGE[0]);
 		}
+		kb.close();
 	}
 			
 }
