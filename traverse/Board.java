@@ -280,21 +280,7 @@ public class Board {
 			// Adds the starting location to the movement string
 			currentCoords = playerPieces[player][i].getCoordinate();
 			currentMoveString = (char) (currentCoords[0]+'a') + Integer.toString(boardHeight-currentCoords[1]);
-			
-			// Remove finished pieces from the running (helps wonky AI)
-			if(player == 0 && currentCoords[1] == 0) {
-				continue;
-			}if(player == 1 && currentCoords[1] == boardHeight-1) {
-				continue;
-			}if(player == 2 && currentCoords[0] == 0) {
-				continue;
-			}if(player == 3 && currentCoords[0] == boardWidth-1) {
-				continue;
-			}
-			
 			allMoveStrings[allMoveStringsPointer] = currentMoveString;
-			
-			
 			
 			// Performs a breadth-first-search of all potential movements from the first movement string
 			while(allMoveStrings[allMoveStringsPointer] != null) {
@@ -400,6 +386,12 @@ public class Board {
 						targetY = 1+j;
 						break;
 				}
+				
+				if((int)(tempSplitString[0].charAt(0)-'a') == targetX && (boardHeight-Integer.parseInt(tempSplitString[0].substring(1))) == targetY) {
+					currentMoveStrength = 0;
+					break;
+				}
+				
 				// Aim for spots without own piece
 				if((board[targetX][targetY] != null && board[targetX][targetY].color != player) || board[targetX][targetY] == null) {
 					
