@@ -151,7 +151,6 @@ public class Board {
 		
 		// Ensure piece is player's piece
 		if(board[xCoords[0]][yCoords[0]].color != player) {
-			System.out.println("player type fail");
 			return false;
 		}
 		
@@ -189,7 +188,7 @@ public class Board {
 			}
 			
 			// Ensures every move is a jump in a long string
-			if(!(Math.abs(relativeYMove) == 2 || Math.abs(relativeYMove) == 2) && moveSquares.length > 2) {
+			if(!(Math.abs(relativeXMove) == 2 || Math.abs(relativeYMove) == 2) && moveSquares.length > 2) {
 				return false;
 			}
 			
